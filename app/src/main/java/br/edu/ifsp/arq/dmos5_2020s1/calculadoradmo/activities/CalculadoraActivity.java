@@ -7,8 +7,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import java.util.concurrent.CompletionService;
-
 import br.edu.ifsp.arq.dmos5_2020s1.calculadoradmo.R;
 import br.edu.ifsp.arq.dmos5_2020s1.calculadoradmo.constants.Constantes;
 import br.edu.ifsp.arq.dmos5_2020s1.calculadoradmo.model.Calculadora;
@@ -17,13 +15,16 @@ public class CalculadoraActivity extends AppCompatActivity implements View.OnCli
 
     private Calculadora calculadora;
 
-    private TextView resultadoView;
     private String resultado;
     private int ultimaOp;
     private boolean foiOp;
     private float memoria;
 
+    private TextView resultadoView;
+
     private Button cButton;
+    private Button ceButton;
+    private Button potenciaButton;
 
     private Button nro0Button;
     private Button nro1Button;
@@ -50,13 +51,17 @@ public class CalculadoraActivity extends AppCompatActivity implements View.OnCli
 
         calculadora = Calculadora.getInstance();
 
-        resultadoView = findViewById(R.id.textview_lcd);
         resultado = "0";
         foiOp = false;
         memoria = 0;
 
+        resultadoView = findViewById(R.id.textview_lcd);
         cButton = findViewById(R.id.button_c);
+        ceButton = findViewById(R.id.button_ce);
+        potenciaButton = findViewById(R.id.button_potencia);
         cButton.setOnClickListener(this);
+        ceButton.setOnClickListener(this);
+        potenciaButton.setOnClickListener(this);
 
         //Botões dos numeros e do ponto
         nro0Button = findViewById(R.id.button_zero);
@@ -106,125 +111,60 @@ public class CalculadoraActivity extends AppCompatActivity implements View.OnCli
             memoria = 0;
         }
 
-        if (v == nro0Button){
-            if(foiOp){
-                resultado = "";
-            }
+        if(v == ceButton){
             foiOp = false;
-            resultado += "0";
-            resultadoView.setText(resultado);
+            resultado = "0";
+            resultadoView.setText("0");
+        }
+
+        if (v == nro0Button){
+            adicionarNro("0");
         }
         if (v == nro1Button){
-            if(foiOp){
-                resultado = "";
-            }
-            foiOp = false;
-            resultado += "1";
-            resultadoView.setText(resultado);
+            adicionarNro("1");
         }
         if (v == nro2Button){
-            if(foiOp){
-                resultado = "";
-            }
-            foiOp = false;
-            resultado += "2";
-            resultadoView.setText(resultado);
+            adicionarNro("2");
         }
         if (v == nro3Button){
-            if(foiOp){
-                resultado = "";
-            }
-            foiOp = false;
-            resultado += "3";
-            resultadoView.setText(resultado);
+            adicionarNro("3");
         }
         if (v == nro4Button){
-            if(foiOp){
-                resultado = "";
-            }
-            foiOp = false;
-            resultado += "4";
-            resultadoView.setText(resultado);
+            adicionarNro("4");
         }
         if (v == nro5Button){
-            if(foiOp){
-                resultado = "";
-            }
-            foiOp = false;
-            resultado += "5";
-            resultadoView.setText(resultado);
+            adicionarNro("5");
         }
         if (v == nro6Button){
-            if(foiOp){
-                resultado = "";
-            }
-            foiOp = false;
-            resultado += "6";
-            resultadoView.setText(resultado);
+            adicionarNro("6");
         }
         if (v == nro7Button){
-            if(foiOp){
-                resultado = "";
-            }
-            foiOp = false;
-            resultado += "7";
-            resultadoView.setText(resultado);
+            adicionarNro("7");
         }
         if (v == nro8Button){
-            if(foiOp){
-                resultado = "";
-            }
-            foiOp = false;
-            resultado += "8";
-            resultadoView.setText(resultado);
+            adicionarNro("8");
         }
         if (v == nro9Button){
-            if(foiOp){
-                resultado = "";
-            }
-            foiOp = false;
-            resultado += "9";
-            resultadoView.setText(resultado);
+            adicionarNro("9");
         }
         if (v == pontoButton){
-            if(foiOp){
-                resultado = "";
-            }
-            foiOp = false;
-            resultado += ".";
-            resultadoView.setText(resultado);
+            adicionarNro(".");
         }
 
         if (v == adicaoButton){
-            foiOp = true;
-            ultimaOp = Constantes.ADICAO;
-            memoria = calculadora.calcular(ultimaOp, Float.parseFloat(resultado));
-            resultadoView.setText(String.valueOf(memoria));
-            resultado = "0";
+            fazerOperacao(Constantes.ADICAO);
         }
         if (v == subtracaoButton){
-            foiOp = true;
-            ultimaOp = Constantes.SUBTRACAO;
-            memoria = calculadora.calcular(ultimaOp, Float.parseFloat(resultado));
-            resultado = "0";
-            resultadoView.setText(String.valueOf(memoria));
+            fazerOperacao(Constantes.SUBTRACAO);
         }
         if (v == multiplicacaoButton){
-            if(resultado != "0") {
-                foiOp = true;
-                ultimaOp = Constantes.MULTIPLICACAO;
-                memoria = calculadora.calcular(ultimaOp, Float.parseFloat(resultado));
-                resultado = "0";
-                resultadoView.setText(String.valueOf(memoria));
+            if(!resultado.equals("0")) {
+                fazerOperacao(Constantes.MULTIPLICACAO);
             }
         }
         if (v == divisaoButton){
-            if(resultado != "0") {
-                foiOp = true;
-                ultimaOp = Constantes.DIVISAO;
-                memoria = calculadora.calcular(ultimaOp, Float.parseFloat(resultado));
-                resultado = "0";
-                resultadoView.setText(String.valueOf(memoria));
+            if(!resultado.equals("0")) {
+                fazerOperacao(Constantes.DIVISAO);
             }
         }
         if (v == igualButton){
@@ -235,7 +175,27 @@ public class CalculadoraActivity extends AppCompatActivity implements View.OnCli
             resultadoView.setText(String.valueOf(memoria));
             ultimaOp = Constantes.RESULTADO;
         }
+
+        if (v == potenciaButton){
+            fazerOperacao(Constantes.POTENCIA);
+        }
     }
 
+    private void fazerOperacao(int constante) {
+        foiOp = true;
+        ultimaOp = constante;
+        memoria = calculadora.calcular(ultimaOp, Float.parseFloat(resultado));
+        resultadoView.setText(String.valueOf(memoria));
+        resultado = "0";
+    }
+
+    private void adicionarNro(String s) {
+        if (foiOp) {
+            resultado = "";
+        }
+        foiOp = false;
+        resultado += s;
+        resultadoView.setText(resultado);
+    }
 
 }
